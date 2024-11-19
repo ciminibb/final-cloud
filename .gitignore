@@ -1,0 +1,27 @@
+# Python-specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables and secrets
+.env
+*.key
+
+# Virtual environments
+venv/
+ENV/
+.venv/
+env/
+
+# Flask and deployment files
+instance/
+*.log
+*.pid
+*.sqlite3
+*.db
+
+# System files
+.DS_Store
+Thumbs.db
+
