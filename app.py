@@ -30,9 +30,14 @@ class Product(db.Model):
 
 # Define class for Transactions table
 class Transaction(db.Model):
-    Hshd_num = db.Column(db.Integer, db.ForeignKey('household.Hshd_num'))
-    Product_num = db.Column(db.Integer, db.ForeignKey('product.Product_num'))
-    Basket_num = db.Column(db.String(100))
+    __tablename__ = 'transaction'  # Explicit table name (optional but recommended)
+
+    # Composite Primary Key: Hshd_num, Product_num, Basket_num
+    Hshd_num = db.Column(db.Integer, db.ForeignKey('household.Hshd_num'), primary_key=True)
+    Product_num = db.Column(db.Integer, db.ForeignKey('product.Product_num'), primary_key=True)
+    Basket_num = db.Column(db.String(100), primary_key=True)
+
+    # Other Columns
     Purchase_date = db.Column(db.Date)
     Spend = db.Column(db.Float)
     Units = db.Column(db.Integer)
