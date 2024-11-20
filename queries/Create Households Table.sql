@@ -1,11 +1,11 @@
 CREATE TABLE Households (
-    Hshd_num INT PRIMARY KEY,
+    Hshd_num BIGINT PRIMARY KEY, -- Allows for larger household numbers
     Loyalty CHAR(1) NULL, -- 'Y' or 'N'
     Age_range VARCHAR(100) NULL,
     Marital VARCHAR(100) NULL,
     Income_range VARCHAR(100) NULL,
     Homeowner VARCHAR(100) NULL,
     Hshd_composition VARCHAR(100) NULL,
-    HH_size INT NULL,
+    HH_size BIGINT NULL, -- Changed from INT to BIGINT
     Children VARCHAR(100) NULL
 );
