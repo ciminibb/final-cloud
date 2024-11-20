@@ -48,6 +48,20 @@ def db_connection_status():
     else:
         return "Failed to connect to the database."
 
+@app.route('/sample')
+def show_households():
+    conn = get_db_connection()  # Establish connection to the database
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Households")  # Query to fetch all households
+        households = cursor.fetchall()  # Fetch all results
+        conn.close()  # Close the connection
+
+        # Render the results in a template
+        return render_template('sample.html', households=households)
+    else:
+        return "Failed to connect to the database."
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 

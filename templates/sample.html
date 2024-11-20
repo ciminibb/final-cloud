@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Households Data</title>
+</head>
+<body>
+    <h1>Households Data</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Hshd_num</th>
+                <th>Loyalty</th>
+                <th>Age_range</th>
+                <th>Marital</th>
+                <th>Income_range</th>
+                <th>Homeowner</th>
+                <th>Hshd_composition</th>
+                <th>HH_size</th>
+                <th>Children</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for household in households %}
+            <tr>
+                <td>{{ household[0] }}</td>
+                <td>{{ household[1] }}</td>
+                <td>{{ household[2] }}</td>
+                <td>{{ household[3] }}</td>
+                <td>{{ household[4] }}</td>
+                <td>{{ household[5] }}</td>
+                <td>{{ household[6] }}</td>
+                <td>{{ household[7] }}</td>
+                <td>{{ household[8] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+
