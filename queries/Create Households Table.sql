@@ -6,6 +6,6 @@ CREATE TABLE Households (
     Income_range VARCHAR(100) NULL,
     Homeowner VARCHAR(100) NULL,
     Hshd_composition VARCHAR(100) NULL,
-    HH_size BIGINT NULL, -- Changed from INT to BIGINT
+    HH_size VARCHAR(100) NULL, -- Changed to a small string to bypass pipeline errors on NULL values
     Children VARCHAR(100) NULL
 );
