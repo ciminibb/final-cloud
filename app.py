@@ -100,7 +100,7 @@ def pull_household_10():
         conn.close()  # Close the connection
 
         # Render the results in a template
-        return render_template('sample.html', households=households)
+        return render_template('sample.html', households=households, username=username, email=email)
     else:
         return "Failed to connect to the database."
 
