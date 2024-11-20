@@ -50,6 +50,9 @@ def db_connection_status():
 
 @app.route('/sample')
 def pull_household_10():
+    username = request.args.get('username')
+    email = request.args.get('email')
+
     conn = get_db_connection()  # Establish connection to the database
     if conn:
         cursor = conn.cursor()

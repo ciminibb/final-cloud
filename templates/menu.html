@@ -7,10 +7,12 @@
 </head>
 <body>
     <h1>Menu</h1>
-    <p>Welcome, {{ username }} ({{ email }})! Select an activity to continue.</p>
+    <p>Logged in as: {{ username }} ({{ email }})</p>
+
+    <h3>Select an activity to continue.</h3>
 
     <ul>
-        <li><a href="{{ url_for('pull_household_10') }}">View Sample Data from Household #10</a></li>
+        <li><a href="{{ url_for('pull_household_10', username=username, email=email) }}">View Sample Data from Household #10</a></li>
 	<li>Add more menu items as needed!</li>
     </ul>
 </body>
