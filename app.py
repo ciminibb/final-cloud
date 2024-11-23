@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pyodbc
+import os
 
 app = Flask(__name__)
 
@@ -18,55 +19,59 @@ def get_db_connection():
     except Exception as e:
         print(f"Error connecting to the database: {e}")
         return None
+    
+def get_ordered_query(option):
+    match option:
+        case "H.Hshd_num":
+            file_path = os.path.join("queries", "Household_Query_Order_HshdNum.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+        
+        case "T.Basket_num":
+            file_path = os.path.join("queries", "Household_Query_Order_BasketNum.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+
+        case "T.Purchase_date":
+            file_path = os.path.join("queries", "Household_Query_Order_PurchaseDate.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+
+        case "T.Product_num":
+            file_path = os.path.join("queries", "Household_Query_Order_ProductNum.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+
+        case "P.Department":
+            file_path = os.path.join("queries", "Household_Query_Order_Department.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+
+        case "P.Commodity":
+            file_path = os.path.join("queries", "Household_Query_Order_Commodity.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+
+        case None:
+            file_path = os.path.join("queries", "Data Pull for Household 10.sql")
+            with open(file_path, 'r') as file:
+                query = file.read()
+            return query
+
 
 # Search the data base for a specific household data and order by the option
 def get_household_by_num(house_num, option):
     conn = get_db_connection() # Establish connection to the database
     if conn:
         cursor = conn.cursor()
-        query = """
-        SELECT
-            H.Hshd_num,
-            T.Basket_num,
-            T.Purchase_date,
-            T.Product_num,
-            P.Department,
-            P.Commodity,
-            P.Brand_ty,
-            P.Natural_organic_flag,
-            T.Spend,
-            T.Units,
-            T.Store_r,
-            T.Week_num,
-            T.Year,
-            H.Loyalty,
-            H.Age_range,
-            H.Marital,
-            H.Income_range,
-            H.Homeowner,
-            H.Hshd_composition,
-            H.HH_size,
-            H.Children
-        FROM
-            Households H
-        JOIN
-            Transactions T ON H.Hshd_num = T.Hshd_num
-        JOIN
-            Products P ON T.Product_num = P.Product_num
-        WHERE
-            H.Hshd_num = ?
-        ORDER BY
-            CASE ?
-            WHEN H.Hshd_num THEN H.Hshd_num
-            WHEN T.Basket_num THEN T.Basket_num
-            WHEN T.Purchase_date THEN T.Purchase_date
-            WHEN T.Product_num THEN T.Product_num
-            WHEN P.Department THEN P.Department
-            WHEN P.Commodity THEN P.Commodity
-            END;
-        """
-            
-        cursor.execute(query, [house_num, option])  # Execute the query
+        query =  get_ordered_query(option)
+        cursor.execute(query, house_num)  # Execute the query
         data = cursor.fetchall()  # Fetch all results
         conn.close()  # Close the connection
         return data
