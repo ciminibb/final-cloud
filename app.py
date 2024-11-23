@@ -54,11 +54,11 @@ def get_household_by_num(house_num, option):
         JOIN
             Products P ON T.Product_num = P.Product_num
         WHERE
-            H.Hshd_num = {house_num}
+            H.Hshd_num = ?
         ORDER BY
-            {option};
+            ?;
         """
-        cursor.execute(query)  # Execute the query
+        cursor.execute(query, house_num, option)  # Execute the query
         data = cursor.fetchall()  # Fetch all results
         conn.close()  # Close the connection
         return data
