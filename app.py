@@ -176,7 +176,7 @@ def search_household():
     # Now contact the database and search for the household and order by the selected option
     results = None
     if (search_number is not "" and selected_option is not ""):
-        results = get_household_by_num(int(search_number), selected_option)
+        results = get_household_by_num(search_number, selected_option)
 
     # Render the results in a template
     return render_template('search.html', username=username, email=email, search_number=search_number, selected_option=selected_option, results=results)
