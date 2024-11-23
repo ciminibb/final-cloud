@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: fit-content;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-input {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .search-button {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-button:hover {
+            background-color: #45a049;
+        }
+        .radio-group {
+            margin-top: 20px;
+        }
+        .radio-button {
+            display: none;
+        }
+        .radio-label {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-right: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .radio-button:checked + .radio-label {
+            background-color: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <p>Logged in as: {{ username }} ({{ email }})</p>
+
+    <form method="POST" action="{{ url_for('search_household', username=username, email=email, search_number=search_number, selected_option=selected_option) }}">
+        <p>Household Number:</p>
+        <div class="search-container">
+            <input type="number" 
+                   name="search_number" 
+                   id="search_number"
+                   class="search-input"
+                   value="{{ search_number if search_number }}"
+                   placeholder="Enter a number"
+                   required>
+            <button type="submit" class="search-button">Search</button>
+        </div>
+        
+        <p>Sort By:</p>
+        <div class="radio-group" id="sort">
+            <input type="radio" id="H.Hshd_num" name="options" value="H.Hshd_num" class="radio-button"
+                {{ 'checked' if selected_option == 'H.Hshd_num' or not selected_option }}>
+            <label for="H.Hshd_num" class="radio-label">Household Number</label>
+            
+            <input type="radio" id="T.Basket_num" name="options" value="T.Basket_num" class="radio-button"
+                {{ 'checked' if selected_option == 'T.Basket_num' }}>
+            <label for="T.Basket_num" class="radio-label">Basket Number</label>
+            
+            <input type="radio" id="T.Purchase_date" name="options" value="T.Purchase_date" class="radio-button"
+                {{ 'checked' if selected_option == 'T.Purchase_date' }}>
+            <label for="T.Purchase_date" class="radio-label">Purchase Date</label>
+            
+            <input type="radio" id="T.Product_num" name="options" value="T.Product_num" class="radio-button"
+                {{ 'checked' if selected_option == 'T.Product_num' }}>
+            <label for="T.Product_num" class="radio-label">Product Number</label>
+
+            <input type="radio" id="P.Department" name="options" value="P.Department" class="radio-button"
+                {{ 'checked' if selected_option == 'P.Department' }}>
+            <label for="P.Department" class="radio-label">Product Department</label>
+
+            <input type="radio" id="P.Commodity" name="options" value="P.Commodity" class="radio-button"
+                {{ 'checked' if selected_option == 'P.Commodity' }}>
+            <label for="P.Commodity" class="radio-label">Product Commodity</label>
+        </div>
+    </form>
+
+    {% if search_number %}
+    <div class="results-container">
+        {% if results %}
+            <h3>Search Results for Household: {{ search_number }} : Sorted By: {{ selected_option }}</h3>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Hshd_num</th>
+                        <th>Basket_num</th>
+                        <th>Purchase_date</th>
+                        <th>Product_num</th>
+                        <th>Department</th>
+                        <th>Commodity</th>
+                        <th>Brand_ty</th>
+                        <th>Natural_organic_flag</th>
+                        <th>Spend</th>
+                        <th>Units</th>
+                        <th>Store_r</th>
+                        <th>Week_num</th>
+                        <th>Year</th>
+                        <th>Loyalty</th>
+                        <th>Age_range</th>
+                        <th>Marital</th>
+                        <th>Income_range</th>
+                        <th>Homeowner</th>
+                        <th>Hshd_composition</th>
+                        <th>HH_size</th>
+                        <th>Children</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for household in results %}
+                    <tr>
+                        <td>{{ household[0] }}</td>
+                        <td>{{ household[1] }}</td>
+                        <td>{{ household[2] }}</td>
+                        <td>{{ household[3] }}</td>
+                        <td>{{ household[4] }}</td>
+                        <td>{{ household[5] }}</td>
+                        <td>{{ household[6] }}</td>
+                        <td>{{ household[7] }}</td>
+                        <td>{{ household[8] }}</td>
+                        <td>{{ household[9] }}</td>
+                        <td>{{ household[10] }}</td>
+                        <td>{{ household[11] }}</td>
+                        <td>{{ household[12] }}</td>
+                        <td>{{ household[13] }}</td>
+                        <td>{{ household[14] }}</td>
+                        <td>{{ household[15] }}</td>
+                        <td>{{ household[16] }}</td>
+                        <td>{{ household[17] }}</td>
+                        <td>{{ household[18] }}</td>
+                        <td>{{ household[19] }}</td>
+                        <td>{{ household[20] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-results">No results found for Household: {{ search_number }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</body>
+</html>
