@@ -54,7 +54,7 @@ def get_household_by_num(house_num, option):
         JOIN
             Products P ON T.Product_num = P.Product_num
         WHERE
-            H.Hshd_num = {house_num}
+            H.Hshd_num = ?
         ORDER BY
             H.Hshd_num,
             T.Basket_num,
@@ -63,7 +63,7 @@ def get_household_by_num(house_num, option):
             P.Department,
             P.Commodity;
         """
-        cursor.execute(query)  # Execute the query
+        cursor.execute(query, house_num)  # Execute the query
         data = cursor.fetchall()  # Fetch all results
         conn.close()  # Close the connection
         return data
