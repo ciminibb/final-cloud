@@ -56,14 +56,9 @@ def get_household_by_num(house_num, option):
         WHERE
             H.Hshd_num = ?
         ORDER BY
-            H.Hshd_num,
-            T.Basket_num,
-            T.Purchase_date,
-            T.Product_num,
-            P.Department,
-            P.Commodity;
+            ?;
         """
-        cursor.execute(query, house_num)  # Execute the query
+        cursor.execute(query, [house_num, option])  # Execute the query
         data = cursor.fetchall()  # Fetch all results
         conn.close()  # Close the connection
         return data
