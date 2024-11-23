@@ -121,45 +121,7 @@ def pull_household_10():
     conn = get_db_connection()  # Establish connection to the database
     if conn:
         cursor = conn.cursor()
-        query = """
-        SELECT
-            H.Hshd_num,
-            T.Basket_num,
-            T.Purchase_date,
-            T.Product_num,
-            P.Department,
-            P.Commodity,
-            P.Brand_ty,
-            P.Natural_organic_flag,
-            T.Spend,
-            T.Units,
-            T.Store_r,
-            T.Week_num,
-            T.Year,
-            H.Loyalty,
-            H.Age_range,
-            H.Marital,
-            H.Income_range,
-            H.Homeowner,
-            H.Hshd_composition,
-            H.HH_size,
-            H.Children
-        FROM
-            Households H
-        JOIN
-            Transactions T ON H.Hshd_num = T.Hshd_num
-        JOIN
-            Products P ON T.Product_num = P.Product_num
-        WHERE
-            H.Hshd_num = 10
-        ORDER BY
-            H.Hshd_num,
-            T.Basket_num,
-            T.Purchase_date,
-            T.Product_num,
-            P.Department,
-            P.Commodity;
-        """
+        query = get_ordered_query(None)
         cursor.execute(query)  # Execute the query
         households = cursor.fetchall()  # Fetch all results
         conn.close()  # Close the connection

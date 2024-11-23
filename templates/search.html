@@ -11,6 +11,18 @@
             margin: 20px auto;
             padding: 0 20px;
         }
+        .button, button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
         .search-container {
             margin-bottom: 20px;
         }
@@ -63,7 +75,10 @@
     </style>
 </head>
 <body>
-    <p>Logged in as: {{ username }} ({{ email }})</p>
+    <div>
+        <p>Logged in as: {{ username }} ({{ email }})</p>
+        <a href="{{ url_for('menu', username=username, email=email) }}" class="button">Menu</a>
+    </div>
 
     <form method="POST" action="{{ url_for('search_household', username=username, email=email, search_number=search_number, selected_option=selected_option) }}">
         <p>Household Number:</p>

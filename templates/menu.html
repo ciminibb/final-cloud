@@ -4,6 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: fit-content;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .button, button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .menu_items {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+    </style>
 </head>
 <body>
     <h1>Menu</h1>
@@ -11,9 +38,9 @@
 
     <h3>Select an activity to continue.</h3>
 
-    <ul>
-        <li><a href="{{ url_for('pull_household_10', username=username, email=email) }}">View Sample Data from Household #10</a></li>
-        <li><a href="{{ url_for('search_household', username=username, email=email) }}">Interactive Web Page</a></li>
+    <ul class="menu_items">
+        <li><a href="{{ url_for('pull_household_10', username=username, email=email) }}" class="button">View Sample Data from Household #10</a></li>
+        <li><a href="{{ url_for('search_household', username=username, email=email) }}" class="button">Interactive Web Page</a></li>
 	    <li>Add more menu items as needed!</li>
     </ul>
 </body>

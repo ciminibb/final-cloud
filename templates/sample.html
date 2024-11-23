@@ -4,10 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sample Data Pull</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: fit-content;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .button, button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+    </style>
 </head>
 <body>
     <h1>Household #10</h1>
-    <p>Logged in as: {{ username }} ({{ email }})</p>
+    <div>
+        <p>Logged in as: {{ username }} ({{ email }})</p>
+        <a href="{{ url_for('menu', username=username, email=email) }}" class="button">Menu</a>
+    </div>
 
     <h3>The following is a sample pull for Household #10, describing their shopping from 2018-2020.</h3>
 
