@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Upload Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p>Logged in as: {{ username }} ({{ email }})</p>
+        <a href="{{ url_for('menu', username=username, email=email) }}" class="button">Menu</a>
+    </div>
+
+    <h2>!!!IMPORTANT!!! - Files must be named correctly to be uploaded:</h2>
+    <h3>Household Data File Name: 400_households.csv</h3>
+    <h3>Product Data File Name: 400_products.csv</h3>
+    <h3>Transaction Data File Name: 400_transactions.csv</h3>
+
+    <div class="container">
+        <h1>Data Upload</h1>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="dataType">Select Data Type:</label>
+                <select id="dataType" required>
+                    <option value="">Choose an option</option>
+                    <option value="household">Household Data</option>
+                    <option value="product">Product Data</option>
+                    <option value="transaction">Transaction Data</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="fileInput">Select File:</label>
+                <input type="file" id="fileInput" required>
+            </div>
+
+            <button type="submit" id="uploadButton">
+                Upload File
+                <span class="spinner" id="spinner"></span>
+            </button>
+        </form>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const messageDiv = document.getElementById('message');
+        const uploadButton = document.getElementById('uploadButton');
+        const fileInput = document.getElementById('fileInput');
+        const dataTypeSelect = document.getElementById('dataType');
+        const spinner = document.getElementById('spinner');
+
+        function showMessage(text, isError = false) {
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            messageDiv.className = `message ${isError ? 'error' : 'success'}`;
+        }
+
+        function validateForm() {
+            if (!dataTypeSelect.value) {
+                showMessage('Please select a data type', true);
+                return false;
+            }
+            if (!fileInput.files[0]) {
+                showMessage('Please select a file', true);
+                return false;
+            }
+            return true;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm()) return;
+
+            uploadButton.disabled = true;
+            spinner.style.display = 'inline-block';
+            messageDiv.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('dataType', dataTypeSelect.value);
+
+            try {
+                const response = await fetch('/upload-file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message);
+                } else {
+                    showMessage(data.error || 'Upload failed', true);
+                }
+            } catch (error) {
+                showMessage('Network error occurred', true);
+            } finally {
+                uploadButton.disabled = false;
+                spinner.style.display = 'none';
+            }
+        });
+
+        // Clear message when selection changes
+        dataTypeSelect.addEventListener('change', () => {
+            messageDiv.style.display = 'none';
+        });
+
+        fileInput.addEventListener('change', () => {
+            messageDiv.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

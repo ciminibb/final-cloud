@@ -1,8 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import pyodbc
 import os
+import ntpath
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient
 
 app = Flask(__name__)
+
+# Configure upload folder
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # Define the database connection details
 server = 'finalproject-group39-sql-server.database.windows.net'
@@ -11,6 +19,7 @@ username = 'finalprojectadmin'
 password = 'group39SECRET'
 driver = '{ODBC Driver 17 for SQL Server}'
 
+# -----------------------------------------------  
 # Function to test database connection
 def get_db_connection():
     try:
@@ -19,52 +28,59 @@ def get_db_connection():
     except Exception as e:
         print(f"Error connecting to the database: {e}")
         return None
+
+# -----------------------------------------------  
+# Function to test storage account connection
+def get_sa_connection():
+    try:
+        # Define the account name and basic credential for the storage account
+        account_url = "https://finalprojectgroup39sa.blob.core.windows.net/"
+        credential = DefaultAzureCredential()
+
+        # Create the BlobServiceClient object
+        blob_service_client = BlobServiceClient(account_url, credential=credential)
+
+        # Create the container client for our storage account
+        return blob_service_client.get_container_client(container="8451-data")
+    except:
+        return None
     
+# -----------------------------------------------  
+def get_query(sqlfile):
+    try:
+        file_path = os.path.join("queries", sqlfile)
+        with open(file_path, 'r') as file:
+            query = file.read()
+        return query
+    except:
+        return None
+
+# -----------------------------------------------  
 def get_ordered_query(option):
     match option:
         case "H.Hshd_num":
-            file_path = os.path.join("queries", "Household_Query_Order_HshdNum.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+            return get_query("Household_Query_Order_HshdNum.sql")
         
         case "T.Basket_num":
-            file_path = os.path.join("queries", "Household_Query_Order_BasketNum.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+            return get_query("Household_Query_Order_BasketNum.sql")
 
         case "T.Purchase_date":
-            file_path = os.path.join("queries", "Household_Query_Order_PurchaseDate.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+            return get_query("Household_Query_Order_PurchaseDate.sql")
 
         case "T.Product_num":
-            file_path = os.path.join("queries", "Household_Query_Order_ProductNum.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+            return get_query("Household_Query_Order_ProductNum.sql")
 
         case "P.Department":
-            file_path = os.path.join("queries", "Household_Query_Order_Department.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+            return get_query("Household_Query_Order_Department.sql")
 
         case "P.Commodity":
-            file_path = os.path.join("queries", "Household_Query_Order_Commodity.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+            return get_query("Household_Query_Order_Commodity.sql")
 
-        case None:
-            file_path = os.path.join("queries", "Data Pull for Household 10.sql")
-            with open(file_path, 'r') as file:
-                query = file.read()
-            return query
+        case _:
+            return get_query("Data Pull for Household 10.sql")
 
 
+# -----------------------------------------------
 # Search the data base for a specific household data and order by the option
 def get_household_by_num(house_num, option):
     conn = get_db_connection() # Establish connection to the database
@@ -75,6 +91,54 @@ def get_household_by_num(house_num, option):
         data = cursor.fetchall()  # Fetch all results
         conn.close()  # Close the connection
         return data
+
+# -----------------------------------------------
+# Setup the blob storage connection so we can send a file to our storage account.
+# Uploading files will replace the existing files of the same name in the blob
+# storage account, this way the data pipeline will pick up the new data.
+def upload_household_blob_file(filepath):
+    try:
+        if (ntpath.basename(filepath) != "400_households.csv"):
+            raise Exception("File name was not the expected file name!")
+        container_client = get_sa_connection()
+        with open(file=filepath, mode="rb") as data:
+            container_client.upload_blob(name="400_households.csv", data=data, overwrite=True)
+        return "The file was successfully uploaded to the server!"
+    except Exception as e:
+        return f"The file failed being uploaded to the server: {e}"
+
+# -----------------------------------------------
+def upload_product_blob_file(filepath):
+    try:
+        if (ntpath.basename(filepath) != "400_products.csv"):
+            raise Exception("File name was not the expected file name!")
+        container_client = get_sa_connection()
+        with open(file=filepath, mode="rb") as data:
+            container_client.upload_blob(name="400_products.csv", data=data, overwrite=True)
+        return "The file was successfully uploaded to the server!"
+    except Exception as e:
+        return f"The file failed being uploaded to the server: {e}"
+
+# -----------------------------------------------
+def upload_transaction_blob_file(filepath):
+    try:
+        if (ntpath.basename(filepath) != "400_transactions.csv"):
+            raise Exception("File name was not the expected file name!")
+        container_client = get_sa_connection()
+        with open(file=filepath, mode="rb") as data:
+            container_client.upload_blob(name="400_transactions.csv", data=data, overwrite=True)
+        return "The file was successfully uploaded to the server!"
+    except Exception as e:
+        return f"The file failed being uploaded to the server: {e}"
+
+# -----------------------------------------------  
+def process_blob_file(filepath, datatype):
+    if datatype == 'household':
+        return upload_household_blob_file(filepath)
+    elif datatype == 'product':
+        return upload_product_blob_file(filepath)
+    elif datatype == 'transaction':
+        return upload_transaction_blob_file(filepath)
 
 # -------------------------------------------------------------------------------------------------
 
@@ -150,11 +214,56 @@ def search_household():
 
     # Now contact the database and search for the household and order by the selected option
     results = None
-    if (search_number is not "" and selected_option is not ""):
+    if (search_number != "" and selected_option != ""):
         results = get_household_by_num(search_number, selected_option)
 
     # Render the results in a template
     return render_template('search.html', username=username, email=email, search_number=search_number, selected_option=selected_option, results=results)
+
+# -------------------------------------------------------------------------------------------------
+
+@app.route("/upload", methods=['GET'])
+def upload():
+    username = request.args.get('username')
+    email = request.args.get('email')
+
+    return render_template('upload.html', username=username, email=email)
+
+# -------------------------------------------------------------------------------------------------
+
+@app.route("/upload-file", methods=['POST'])
+def upload_file():
+    try:
+        # Check if file is present in request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['file']
+        data_type = request.form.get('dataType')
+        
+        # Check if file was selected
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        # Create directory for specific data type if it doesn't exist
+        data_type_folder = os.path.join(UPLOAD_FOLDER, data_type)
+        if not os.path.exists(data_type_folder):
+            os.makedirs(data_type_folder)
+
+        # Save the file
+        filepath = os.path.join(data_type_folder, file.filename)
+        file.save(filepath)
+
+        # Process the file based on data type
+        status = process_blob_file(filepath, data_type)
+
+        return jsonify({
+            'message': status,
+            'filename': file.filename
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # -------------------------------------------------------------------------------------------------
 
