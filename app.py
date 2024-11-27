@@ -153,11 +153,6 @@ def submit():
     username = request.form['username']
     password = request.form['password']
     email = request.form['email']
-
-    # Try and establish the conneciton here to 'wake up' the database
-    conn = get_db_connection()
-    if conn:
-        conn.close()
     
     return redirect(url_for('menu', username=username, email=email))
 
