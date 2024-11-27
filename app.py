@@ -276,7 +276,7 @@ def dashboard():
 
 # -------------------------------------------------------------------------------------------------
 # Chart 1 - Bar chart where x-axis is the age ranges and y-axis is the total spend per basket
-# Chart 2 - Bar chart where the x-axis is whether they are a homeowner and the y-axis is the avaerage number of units per basket
+# Chart 2 - Bar chart where the x-axis is whether they are a homeowner and the y-axis is the number of units per basket
 # Chart 3 - Bar chart where the x-axis is the store-region and the y-axis is number of homeowners in that region
 # Chart 4 - Pie chart where each section of the pie are the different income ranges and size of the slice is determined by number of people in that income range
 # Chart 5 - Bar chart where the x-axis is the income range and the y-axis is the average spend per basket
@@ -303,6 +303,7 @@ def dashboard_agespendgraph():
             'datasets': [{
                 'label': 'Total Spend',
                 'data': data,
+                'backgroundColor': 'blue',
                 'borderColor': 'blue',
                 'fill': False
             }]
@@ -311,13 +312,26 @@ def dashboard_agespendgraph():
 
 @app.route("/dashboard-homeownerunitschart", methods=['GET'])
 def dashboard_homeownerunitschart():
+    conn = get_db_connection()
+    rawData = []
+    if conn:
+        cursor = conn.cursor()
+        query =  get_query("chart2.sql")
+        cursor.execute(query)
+        rawData = cursor.fetchall()
+        conn.close()
+
+    labels = [row[0] for row in rawData if row[0] != "Homeowner"]
+    data = [row[1] for row in rawData if row[1] != "total_units"]
+
     return jsonify({
         'type': 'line',
         'data': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'labels': labels,
             'datasets': [{
-                'label': 'Monthly Sales',
-                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'label': 'Total Units',
+                'data': data,
+                'backgroundColor': 'blue',
                 'borderColor': 'blue',
                 'fill': False
             }]
@@ -326,13 +340,26 @@ def dashboard_homeownerunitschart():
 
 @app.route("/dashboard-regionhomeownerchart", methods=['GET'])
 def dashboard_regionhomeownerchart():
+    conn = get_db_connection()
+    rawData = []
+    if conn:
+        cursor = conn.cursor()
+        query =  get_query("chart3.sql")
+        cursor.execute(query)
+        rawData = cursor.fetchall()
+        conn.close()
+
+    labels = [row[0] for row in rawData if row[0] != "Store_r"]
+    data = [row[1] for row in rawData if row[1] != "num_homeowners"]
+
     return jsonify({
-        'type': 'line',
+        'type': 'bar',
         'data': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'labels': labels,
             'datasets': [{
-                'label': 'Monthly Sales',
-                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'label': 'Num Homeowners',
+                'data': data,
+                'backgroundColor': 'blue',
                 'borderColor': 'blue',
                 'fill': False
             }]
