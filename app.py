@@ -153,6 +153,11 @@ def submit():
     username = request.form['username']
     password = request.form['password']
     email = request.form['email']
+
+    # Try and establish the conneciton here to 'wake up' the database
+    conn = get_db_connection()
+    if conn:
+        conn.close()
     
     return redirect(url_for('menu', username=username, email=email))
 
@@ -279,8 +284,8 @@ def dashboard():
 # Chart 2 - Bar chart where the x-axis is whether they are a homeowner and the y-axis is the number of units per basket
 # Chart 3 - Bar chart where the x-axis is the store-region and the y-axis is number of homeowners in that region
 # Chart 4 - Pie chart where each section of the pie are the different income ranges and size of the slice is determined by number of people in that income range
-# Chart 5 - Bar chart where the x-axis is the income range and the y-axis is the average spend per basket
-# Chart 6 - Bar chart where the x-axis is the number of children and the y-axis is both the average spend per basket and the average number of units per basket
+# Chart 5 - Bar chart where the x-axis is the income range and the y-axis is the spend per basket
+# Chart 6 - Bar chart where the x-axis is the number of children and the y-axis is both the spend per basket and the number of units per basket
 
 @app.route("/dashboard-agespendgraph", methods=['GET'])
 def dashboard_agespendgraph():
@@ -293,8 +298,8 @@ def dashboard_agespendgraph():
         rawData = cursor.fetchall()
         conn.close()
 
-    labels = [row[0] for row in rawData if row[0] != "Age_range"]
-    data = [row[1] for row in rawData if row[1] != "total_spend"]
+    labels = [row[0] for row in rawData]
+    data = [row[1] for row in rawData]
     
     return jsonify({
         'type': 'bar',
@@ -321,11 +326,11 @@ def dashboard_homeownerunitschart():
         rawData = cursor.fetchall()
         conn.close()
 
-    labels = [row[0] for row in rawData if row[0] != "Homeowner"]
-    data = [row[1] for row in rawData if row[1] != "total_units"]
+    labels = [row[0] for row in rawData]
+    data = [row[1] for row in rawData]
 
     return jsonify({
-        'type': 'line',
+        'type': 'bar',
         'data': {
             'labels': labels,
             'datasets': [{
@@ -349,8 +354,8 @@ def dashboard_regionhomeownerchart():
         rawData = cursor.fetchall()
         conn.close()
 
-    labels = [row[0] for row in rawData if row[0] != "Store_r"]
-    data = [row[1] for row in rawData if row[1] != "num_homeowners"]
+    labels = [row[0] for row in rawData]
+    data = [row[1] for row in rawData]
 
     return jsonify({
         'type': 'bar',
@@ -368,28 +373,58 @@ def dashboard_regionhomeownerchart():
 
 @app.route("/dashboard-incomechart", methods=['GET'])
 def dashboard_incomechart():
+    conn = get_db_connection()
+    rawData = []
+    if conn:
+        cursor = conn.cursor()
+        query =  get_query("chart4.sql")
+        cursor.execute(query)
+        rawData = cursor.fetchall()
+        conn.close()
+
+    labels = [row[0] for row in rawData]
+    data = [row[1] for row in rawData]
+
     return jsonify({
-        'type': 'line',
+        'type': 'pie',
         'data': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'labels': labels,
             'datasets': [{
-                'label': 'Monthly Sales',
-                'data': [12000, 15000, 18000, 16500, 20000, 22000],
-                'borderColor': 'blue',
-                'fill': False
+                'data': data,
+                'backgroundColor': [
+                    '#00FFFF',
+                    '#7FFFD4',
+                    '#0000FF',
+                    '#6495ED',
+                    '#00008B',
+                    '#7B68EE'
+                ]
             }]
         }
     })
 
 @app.route("/dashboard-incomespendchart", methods=['GET'])
 def dashboard_incomespendchart():
+    conn = get_db_connection()
+    rawData = []
+    if conn:
+        cursor = conn.cursor()
+        query =  get_query("chart5.sql")
+        cursor.execute(query)
+        rawData = cursor.fetchall()
+        conn.close()
+
+    labels = [row[0] for row in rawData]
+    data = [row[1] for row in rawData]
+    
     return jsonify({
-        'type': 'line',
+        'type': 'bar',
         'data': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'labels': labels,
             'datasets': [{
-                'label': 'Monthly Sales',
-                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'label': 'Total Spend',
+                'data': data,
+                'backgroundColor': 'blue',
                 'borderColor': 'blue',
                 'fill': False
             }]
@@ -398,14 +433,35 @@ def dashboard_incomespendchart():
 
 @app.route("/dashboard-childrenspendunitschart", methods=['GET'])
 def dashboard_childrenspendunitschart():
+    conn = get_db_connection()
+    rawData = []
+    if conn:
+        cursor = conn.cursor()
+        query =  get_query("chart6.sql")
+        cursor.execute(query)
+        rawData = cursor.fetchall()
+        conn.close()
+
+    labels = [row[0] for row in rawData]
+    dataSpend = [row[1] for row in rawData]
+    dataUnits = [row[2] for row in rawData]
+    
     return jsonify({
-        'type': 'line',
+        'type': 'bar',
         'data': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'labels': labels,
             'datasets': [{
-                'label': 'Monthly Sales',
-                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'label': 'Total Spend',
+                'data': dataSpend,
+                'backgroundColor': 'blue',
                 'borderColor': 'blue',
+                'fill': False
+            },
+            {
+                'label': 'Total Units',
+                'data': dataUnits,
+                'backgroundColor': '#00FFFF',
+                'borderColor': '#00FFFF',
                 'fill': False
             }]
         }
