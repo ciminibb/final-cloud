@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: fit-content;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .button, button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
+            max-width: fit-content;
+            margin: 0 auto;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        .chart {
+            width: 150%;
+            height: 300px;
+        }
+        .loading {
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p>Logged in as: {{ username }} ({{ email }})</p>
+        <a href="{{ url_for('menu', username=username, email=email) }}" class="button">Menu</a>
+    </div>
+
+    <div class="dashboard">
+        <div class="chart-container">
+            <h3>Spend for each Age Group</h3>
+            <div id="agespendchart-loading" class="loading">Loading...</div>
+            <canvas id="agespendchart" class="chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Number of Units by Homeowner</h3>
+            <div id="homeownerunitschart-loading" class="loading">Loading...</div>
+            <canvas id="homeownerunitschart" class="chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Homeowners by Store Region</h3>
+            <div id="regionhomeownerchart-loading" class="loading">Loading...</div>
+            <canvas id="regionhomeownerchart" class="chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Customers in Income Range</h3>
+            <div id="incomechart-loading" class="loading">Loading...</div>
+            <canvas id="incomechart" class="chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Spend for each Income Range</h3>
+            <div id="incomespendchart-loading" class="loading">Loading...</div>
+            <canvas id="incomespendchart" class="chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Spend and Units for Number of Children</h3>
+            <div id="childrenspendunitschart-loading" class="loading">Loading...</div>
+            <canvas id="childrenspendunitschart" class="chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch chart data from Flask routes
+        async function fetchChartData(chartId, route) {
+            const chartCanvas = document.getElementById(chartId);
+            const loadingElement = document.getElementById(`${chartId}-loading`);
+            try {
+                const response = await fetch(route);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // Hide loading, show chart
+                loadingElement.style.display = 'none';
+                chartCanvas.style.display = 'block';
+
+                renderChart(chartId, data);
+            } catch (error) {
+                console.error(`Error fetching data for ${chartId}:`, error);
+                loadingElement.textContent = 'Error loading chart';
+            }
+        }
+
+        // Function to render charts using Chart.js
+        function renderChart(chartId, data) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            new Chart(ctx, {
+                type: data.type || 'bar',
+                data: data.data,
+                options: data.options || {}
+            });
+        }
+
+        // Fetch data for all charts when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchChartData('agespendchart', '/dashboard-agespendgraph');
+            fetchChartData('homeownerunitschart', 'dashboard-homeownerunitschart');
+            fetchChartData('regionhomeownerchart', '/dashboard-regionhomeownerchart');
+            fetchChartData('incomechart', '/dashboard-incomechart');
+            fetchChartData('incomespendchart', '/dashboard-incomespendchart');
+            fetchChartData('childrenspendunitschart', '/dashboard-childrenspendunitschart');
+        });
+    </script>
+</body>
+</html>

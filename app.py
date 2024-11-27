@@ -267,6 +267,125 @@ def upload_file():
 
 # -------------------------------------------------------------------------------------------------
 
+@app.route("/dashboard", methods=['GET'])
+def dashboard():
+    username = request.args.get('username')
+    email = request.args.get('email')
+
+    return render_template('dashboard.html', username=username, email=email)
+
+# -------------------------------------------------------------------------------------------------
+# Chart 1 - Bar chart where x-axis is the age ranges and y-axis is the total spend per basket
+# Chart 2 - Bar chart where the x-axis is whether they are a homeowner and the y-axis is the avaerage number of units per basket
+# Chart 3 - Bar chart where the x-axis is the store-region and the y-axis is number of homeowners in that region
+# Chart 4 - Pie chart where each section of the pie are the different income ranges and size of the slice is determined by number of people in that income range
+# Chart 5 - Bar chart where the x-axis is the income range and the y-axis is the average spend per basket
+# Chart 6 - Bar chart where the x-axis is the number of children and the y-axis is both the average spend per basket and the average number of units per basket
+
+@app.route("/dashboard-agespendgraph", methods=['GET'])
+def dashboard_agespendgraph():
+    conn = get_db_connection()
+    rawData = []
+    if conn:
+        cursor = conn.cursor()
+        query =  get_query("chart1.sql")
+        cursor.execute(query)
+        rawData = cursor.fetchall()
+        conn.close()
+
+    labels = [row[0] for row in rawData if row[0] != "Age_range"]
+    data = [row[1] for row in rawData if row[1] != "total_spend"]
+    
+    return jsonify({
+        'type': 'bar',
+        'data': {
+            'labels': labels,
+            'datasets': [{
+                'label': 'Total Spend',
+                'data': data,
+                'borderColor': 'blue',
+                'fill': False
+            }]
+        }
+    })
+
+@app.route("/dashboard-homeownerunitschart", methods=['GET'])
+def dashboard_homeownerunitschart():
+    return jsonify({
+        'type': 'line',
+        'data': {
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets': [{
+                'label': 'Monthly Sales',
+                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'borderColor': 'blue',
+                'fill': False
+            }]
+        }
+    })
+
+@app.route("/dashboard-regionhomeownerchart", methods=['GET'])
+def dashboard_regionhomeownerchart():
+    return jsonify({
+        'type': 'line',
+        'data': {
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets': [{
+                'label': 'Monthly Sales',
+                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'borderColor': 'blue',
+                'fill': False
+            }]
+        }
+    })
+
+@app.route("/dashboard-incomechart", methods=['GET'])
+def dashboard_incomechart():
+    return jsonify({
+        'type': 'line',
+        'data': {
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets': [{
+                'label': 'Monthly Sales',
+                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'borderColor': 'blue',
+                'fill': False
+            }]
+        }
+    })
+
+@app.route("/dashboard-incomespendchart", methods=['GET'])
+def dashboard_incomespendchart():
+    return jsonify({
+        'type': 'line',
+        'data': {
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets': [{
+                'label': 'Monthly Sales',
+                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'borderColor': 'blue',
+                'fill': False
+            }]
+        }
+    })
+
+@app.route("/dashboard-childrenspendunitschart", methods=['GET'])
+def dashboard_childrenspendunitschart():
+    return jsonify({
+        'type': 'line',
+        'data': {
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            'datasets': [{
+                'label': 'Monthly Sales',
+                'data': [12000, 15000, 18000, 16500, 20000, 22000],
+                'borderColor': 'blue',
+                'fill': False
+            }]
+        }
+    })
+
+# -------------------------------------------------------------------------------------------------
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
