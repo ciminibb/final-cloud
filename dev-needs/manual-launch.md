@@ -23,7 +23,9 @@ cd app
 python3 app.py
 ```
 
-After which, the app will run at http://52.247.248.246:5000/
+After which, the app will run at http://52.247.248.246:5000/. ***On occasion, the database connection will fail on launching
+the app. If so, refresh the page a few times and it will resolve itself. This works best from the "View Sample Data from Household #10"
+page.***
 
 > ### Other Tips
 > 
